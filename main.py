@@ -1,16 +1,30 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import uvicorn
 
 app = FastAPI()
 
+# Module 3: permissive CORS is limited to local development.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-class TaskInput(BaseModel):
+
+class TaskCreate(BaseModel):
     title: str
     hours: float
+
+
+class TaskResponse(TaskCreate):
+    id: int
 
 
 @app.exception_handler(RequestValidationError)
@@ -29,21 +43,28 @@ def read_root():
     return {"status": "online"}
 
 
-@app.post("/tasks", status_code=status.HTTP_201_CREATED)
-def create_task(task: TaskInput):
-    if not task.title.strip():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Title must not be empty",
-        )
+@app.post(
+    "/tasks",
+    response_model=TaskResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_task(task: TaskCreate):
+    pass
 
-    if task.hours < 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Hours must not be negative",
-        )
 
-    return {"title": task.title, "hours": task.hours}
+@app.get("/tasks", response_model=list[TaskResponse])
+def list_tasks():
+    pass
+
+
+@app.put("/tasks/{task_id}", response_model=TaskResponse)
+def update_task(task_id: int, task: TaskCreate):
+    pass
+
+
+@app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(task_id: int):
+    pass
 
 
 if __name__ == "__main__":
