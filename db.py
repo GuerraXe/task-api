@@ -43,6 +43,3 @@ def get_db() -> Generator[sqlite3.Connection, None, None]:
         raise
     finally:
         conn.close()
-
-
-init_db()

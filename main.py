@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import uvicorn
 
-from db import get_db
+from db import get_db, init_db
 
 app = FastAPI()
 
@@ -152,4 +152,5 @@ def delete_task(
 
 
 if __name__ == "__main__":
+    init_db()
     uvicorn.run("main:app", port=8000, reload=True)
